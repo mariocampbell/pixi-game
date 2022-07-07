@@ -5,8 +5,8 @@ import './style.css';
 
 PIXI.utils.sayHello('hello pixijs');
 const app = document.querySelector('#app');
-const w = 512;
-const h = 512;
+let w = 512;
+let h = 512;
 const game = new PIXI.Application({
   width: w,
   height: h,
@@ -74,6 +74,11 @@ function addMonster() {
   }));
 }
 
+function updateCoin(num) {
+  coins = num;
+  document.querySelector('#score span').innerHTML = coins;
+}
+
 class Player extends Circle {
   constructor(color, radius, v) {
     super(color, radius, v);
@@ -97,6 +102,28 @@ class Player extends Circle {
         reset();
       }
     });
+
+    if (this.collide(coin)) {
+      updateCoin(coins + 1);
+      coin.random();
+      addMonster();
+      this.speed = Math.min(4, this.speed + 0.2);
+
+      return null;
+    }
+  }
+}
+
+class Coin extends Circle {
+  random() {
+    this.circle.x = this.radius + Math.random() * (w - 2 * this.radius);
+    this.circle.y = this.radius + Math.random() * (h - 2 * this.radius);
+    this.update();
+  }
+
+  update() {
+    const s = 1 + Math.sin(new Date() * 0.01) * 0.2;
+    this.circle.scale.set(s, s);
   }
 }
 
@@ -104,9 +131,12 @@ function reset() {
   monsters.forEach((m) => {
     m.remove();
   });
+
   monsters = [];
   addMonster();
   player.reset();
+  coin.random();
+  updateCoin(0);
 }
 
 function onkeydown(event) {
@@ -178,17 +208,24 @@ function setupControls() {
 
 function gameLoop() {
   player.update();
-  // coin.update()
+  coin.update();
   monsters.forEach((c) => {
     c.update();
   });
 }
 
-addMonster();
-addMonster();
 player = new Player(0xfcf8ec, 10, { x: 0, y: 0 });
-setupControls();
+coin = new Coin(0xfcf8ec, 10, { x: 0, y: 0 });
 
-// game.renderer.resize(window.innerWidth, window.innerHeight)
+window.onresize = () => {
+  w = app.clientWidth;
+  h = w;
+  game.renderer.resize(w, h);
+  reset();
+};
+
+// game.renderer.resize(window.innerWidth, window.innerHeight);
 app.appendChild(game.view);
 setInterval(gameLoop, 1000 / 60);
+setupControls();
+reset();
