@@ -11,5 +11,8 @@
         "sourceType": "module"
     },
     "rules": {
+        "import/prefer-default-export": "off",
+        "import/no-cycle": "off",
+        "import/no-mutable-exports": "off",
     }
 }
