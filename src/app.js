@@ -1,133 +1,43 @@
-/* eslint-disable max-classes-per-file */
 import * as PIXI from 'pixi.js';
-import gsap from 'gsap';
+import {
+  Monster,
+  Player,
+  Coin,
+} from './classes';
+
 import './style.css';
 
-PIXI.utils.sayHello('hello pixijs');
+/* VARIABLES */
 const app = document.querySelector('#app');
-let w = 512;
-let h = 512;
-const game = new PIXI.Application({
+export const w = 600;
+export const h = 600;
+export const game = new PIXI.Application({
   width: w,
   height: h,
   backgroundColor: 0x456268,
   antialias: true,
 });
-
-let monsters = [];
+export let monsters = [];
 const pressed = {};
-let player;
-let coin;
-let coins;
+const player = new Player(0xfcf8ec, 10, { x: 0, y: 0 });
+export const coin = new Coin(0xfff2cc, 10, { x: 0, y: 0 });
+export let coins;
+/* ------------ */
 
-/*
- * classes
-*/
-class Circle {
-  constructor(color, radius, v) {
-    this.radius = radius;
-    this.v = v;
-
-    const circle = new PIXI.Graphics();
-    circle.beginFill(color)
-      .drawCircle(0, 0, radius)
-      .endFill();
-    circle.x = radius;
-    circle.y = radius;
-    game.stage.addChild(circle);
-
-    this.circle = circle;
-  }
-
-  remove() {
-    game.stage.removeChild(this.circle);
-  }
-
-  collide(other) {
-    const dx = other.circle.x - this.circle.x;
-    const dy = other.circle.y - this.circle.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-
-    return dist < (this.radius + other.radius);
-  }
-}
-
-class Monster extends Circle {
-  update() {
-    this.circle.x += this.v.x;
-    this.circle.y += this.v.y;
-
-    if (this.circle.x >= w - this.radius || this.circle.x <= this.radius) {
-      this.v.x *= -1;
-    }
-
-    if (this.circle.y >= h - this.radius || this.circle.y <= this.radius) {
-      this.v.y *= -1;
-    }
-  }
-}
-
-function addMonster() {
+/* FUNCTIONS */
+export function addMonster() {
   monsters.push(new Monster(0x79a3b1, Math.random() * 10 + 10, {
     x: 2 + Math.random(),
     y: 2 + Math.random(),
   }));
 }
 
-function updateCoin(num) {
+export function updateCoin(num) {
   coins = num;
   document.querySelector('#score span').innerHTML = coins;
 }
 
-class Player extends Circle {
-  constructor(color, radius, v) {
-    super(color, radius, v);
-    this.reset();
-  }
-
-  reset() {
-    this.circle.x = w / 2;
-    this.circle.y = h / 2;
-    this.speed = 2;
-  }
-
-  update() {
-    const x = this.circle.x + this.v.x;
-    const y = this.circle.y + this.v.y;
-    this.circle.x = Math.min(Math.max(x, this.radius), w - this.radius);
-    this.circle.y = Math.min(Math.max(y, this.radius), w - this.radius);
-
-    monsters.forEach((m) => {
-      if (this.collide(m)) {
-        reset();
-      }
-    });
-
-    if (this.collide(coin)) {
-      updateCoin(coins + 1);
-      coin.random();
-      addMonster();
-      this.speed = Math.min(4, this.speed + 0.2);
-
-      return null;
-    }
-  }
-}
-
-class Coin extends Circle {
-  random() {
-    this.circle.x = this.radius + Math.random() * (w - 2 * this.radius);
-    this.circle.y = this.radius + Math.random() * (h - 2 * this.radius);
-    this.update();
-  }
-
-  update() {
-    const s = 1 + Math.sin(new Date() * 0.01) * 0.2;
-    this.circle.scale.set(s, s);
-  }
-}
-
-function reset() {
+export function reset() {
   monsters.forEach((m) => {
     m.remove();
   });
@@ -213,18 +123,8 @@ function gameLoop() {
     c.update();
   });
 }
+/* ------------ */
 
-player = new Player(0xfcf8ec, 10, { x: 0, y: 0 });
-coin = new Coin(0xfcf8ec, 10, { x: 0, y: 0 });
-
-window.onresize = () => {
-  w = app.clientWidth;
-  h = w;
-  game.renderer.resize(w, h);
-  reset();
-};
-
-// game.renderer.resize(window.innerWidth, window.innerHeight);
 app.appendChild(game.view);
 setInterval(gameLoop, 1000 / 60);
 setupControls();
