@@ -21,7 +21,13 @@ export let monsters = [];
 const pressed = {};
 const player = new Player(0xfcf8ec, 10, { x: 0, y: 0 });
 export const coin = new Coin(0xfff2cc, 10, { x: 0, y: 0 });
-export let coins;
+export let coins = 0;
+
+const score = new PIXI.Text()
+score.anchor.set(0.5)
+score.x = game.screen.width / 2
+score.y = 20
+game.stage.addChild(score)
 /* ------------ */
 
 /* FUNCTIONS */
@@ -33,8 +39,9 @@ export function addMonster() {
 }
 
 export function updateCoin(num) {
+  score.text = num
   coins = num;
-  document.querySelector('#score span').innerHTML = coins;
+  // document.querySelector('#score span').innerHTML = coins;
 }
 
 export function reset() {
@@ -124,6 +131,7 @@ function gameLoop() {
   });
 }
 /* ------------ */
+
 
 app.appendChild(game.view);
 setInterval(gameLoop, 1000 / 60);
